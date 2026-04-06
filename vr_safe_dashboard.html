@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VR-SAFE · Centro de Capacitación</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E05A1B;--orange-dim:#7A3410;--orange-pale:#1E1208;
+  --teal:#1BBFA0;--teal-dim:#0D6E5A;--teal-pale:#051A15;
+  --amber:#F0A500;--amber-pale:#1E1500;
+  --red:#D94040;--red-pale:#1E0808;
+  --blue:#3A8FD9;
+  --surface:#0E1209;--surface2:#161B11;--surface3:#1D241A;--surface4:#252D21;
+  --border:#272E23;--border2:#333B2E;--border3:#404A39;
+  --text:#E4E9DF;--text2:#8F9789;--text3:#555E4F;--text4:#363D31;
+  --font-head:'Space Mono',monospace;
+  --font-body:'DM Sans',sans-serif;
+  --radius:8px;--radius-lg:12px;
+}
+html,body{height:100%;background:var(--surface);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.5}
+
+/* ─── VIEWS ─── */
+.view{display:none;min-height:100vh}
+.view.active{display:flex}
+
+/* ══════════════════════════════════
+   LOGIN
+══════════════════════════════════ */
+#view-login{align-items:center;justify-content:center;position:relative;overflow:hidden}
+.login-bg{position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 50% at 70% 50%, rgba(224,90,27,0.07) 0%, transparent 70%),
+  radial-gradient(ellipse 40% 60% at 20% 80%, rgba(27,191,160,0.05) 0%, transparent 60%);
+  pointer-events:none}
+.login-grid{position:absolute;inset:0;background-image:
+  linear-gradient(var(--border) 1px,transparent 1px),
+  linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;opacity:0.4;pointer-events:none}
+.login-box{position:relative;z-index:1;width:100%;max-width:400px;padding:0 20px}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.login-logo-badge{background:var(--orange);color:#fff;font-family:var(--font-head);font-size:12px;font-weight:700;padding:6px 12px;border-radius:5px;letter-spacing:0.1em}
+.login-logo-text{font-family:var(--font-head);font-size:14px;color:var(--text2);letter-spacing:0.06em}
+.login-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:32px}
+.login-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:28px}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-family:var(--font-head);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:7px}
+.form-input{width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:var(--radius);padding:11px 14px;font-family:var(--font-body);font-size:14px;color:var(--text);outline:none;transition:border-color 0.15s}
+.form-input:focus{border-color:var(--orange)}
+.form-input::placeholder{color:var(--text4)}
+.login-hint{font-size:11px;color:var(--text4);margin-top:5px}
+.btn-login{width:100%;background:var(--orange);border:none;border-radius:var(--radius);padding:13px;font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fff;cursor:pointer;margin-top:8px;transition:background 0.15s}
+.btn-login:hover{background:#C04E17}
+.login-error{display:none;background:var(--red-pale);border:1px solid rgba(217,64,64,0.3);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:16px}
+.login-error.visible{display:block}
+.login-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--text3)}
+
+/* ══════════════════════════════════
+   LAYOUT AUTENTICADO
+══════════════════════════════════ */
+#view-dashboard,#view-profile{flex-direction:column}
+.app-nav{background:var(--surface2);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;height:52px;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-badge{background:var(--orange);color:#fff;font-family:var(--font-head);font-size:10px;padding:3px 8px;border-radius:4px;letter-spacing:0.08em}
+.nav-title{font-family:var(--font-head);font-size:12px;color:var(--text2);letter-spacing:0.05em}
+.nav-sep{flex:1}
+.nav-user{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+.nav-avatar{width:28px;height:28px;border-radius:50%;background:var(--orange-dim);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:10px;color:var(--orange);border:1px solid var(--orange-dim)}
+.btn-logout{background:transparent;border:1px solid var(--border2);border-radius:5px;padding:4px 12px;font-family:var(--font-head);font-size:10px;color:var(--text3);cursor:pointer;letter-spacing:0.06em;transition:all 0.15s}
+.btn-logout:hover{border-color:var(--border3);color:var(--text2)}
+.page-content{padding:24px 28px;flex:1;max-width:1200px;width:100%;margin:0 auto}
+
+/* ══════════════════════════════════
+   BUSCADOR RUT
+══════════════════════════════════ */
+.search-bar{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.search-icon{font-size:18px;color:var(--text3)}
+.search-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--font-body);font-size:15px;color:var(--text)}
+.search-input::placeholder{color:var(--text4)}
+.btn-search{background:var(--orange);border:none;border-radius:6px;padding:9px 20px;font-family:var(--font-head);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fff;cursor:pointer;white-space:nowrap;transition:background 0.15s}
+.btn-search:hover{background:#C04E17}
+.search-hint{font-size:11px;color:var(--text3);font-family:var(--font-head)}
+
+/* ══════════════════════════════════
+   MÉTRICAS
+══════════════════════════════════ */
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.mc-orange::before{background:var(--orange)}
+.mc-teal::before{background:var(--teal)}
+.mc-amber::before{background:var(--amber)}
+.mc-red::before{background:var(--red)}
+.metric-label{font-size:10px;font-family:var(--font-head);color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.metric-value{font-family:var(--font-head);font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.metric-value sup{font-size:13px;color:var(--text2)}
+.metric-delta{font-size:11px;margin-top:6px}
+.delta-up{color:var(--teal)}
+.delta-down{color:var(--red)}
+
+/* ══════════════════════════════════
+   PANELS
+══════════════════════════════════ */
+.grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.panel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.panel-title{font-family:var(--font-head);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3)}
+.panel-badge{font-size:10px;font-family:var(--font-head);padding:3px 8px;border-radius:3px;background:var(--surface3);color:var(--text3);border:1px solid var(--border)}
+
+/* Escenas */
+.scene-list{display:flex;flex-direction:column;gap:5px}
+.scene-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:var(--surface3);border:1px solid var(--border);cursor:pointer;transition:border-color 0.15s}
+.scene-row:hover{border-color:var(--border3)}
+.scene-num{font-family:var(--font-head);font-size:10px;color:var(--text3);min-width:20px}
+.scene-name{font-size:12px;color:var(--text2);flex:1}
+.scene-bar-wrap{width:80px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.scene-bar-fill{height:100%;border-radius:2px;transition:width 0.5s}
+.scene-pct{font-family:var(--font-head);font-size:10px;min-width:30px;text-align:right}
+.scene-time{font-size:10px;color:var(--text3);min-width:32px;text-align:right;font-family:var(--font-head)}
+
+/* PASS */
+.pass-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pass-card{background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.pass-letter{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--orange);line-height:1}
+.pass-word{font-size:9px;color:var(--text3);font-family:var(--font-head);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px}
+.pass-bar{margin-top:8px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.pass-bar-fill{height:100%;border-radius:2px}
+.pass-pct{font-size:13px;font-weight:600;margin-top:5px;font-family:var(--font-head)}
+
+/* Tabla */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-family:var(--font-head);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);text-align:left;padding:0 8px 8px;border-bottom:1px solid var(--border)}
+.data-table td{padding:8px 8px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr td:first-child{font-weight:600;color:var(--text)}
+.data-table tr{transition:background 0.1s}
+.data-table tbody tr{cursor:pointer}
+.data-table tbody tr:hover td{background:var(--surface3)}
+.rut-link{color:var(--orange);font-family:var(--font-head);font-size:11px;text-decoration:none}
+.rut-link:hover{text-decoration:underline}
+
+/* Badges */
+.badge{display:inline-block;font-size:9px;font-family:var(--font-head);padding:2px 8px;border-radius:3px;letter-spacing:0.05em;text-transform:uppercase}
+.badge-pass{background:rgba(27,191,160,0.12);color:var(--teal);border:1px solid rgba(27,191,160,0.25)}
+.badge-fail{background:rgba(217,64,64,0.1);color:var(--red);border:1px solid rgba(217,64,64,0.2)}
+.badge-prog{background:rgba(240,165,0,0.1);color:var(--amber);border:1px solid rgba(240,165,0,0.2)}
+
+/* Score pills */
+.score{font-family:var(--font-head);font-size:11px;font-weight:700}
+.score-hi{color:var(--teal)}
+.score-mid{color:var(--amber)}
+.score-lo{color:var(--red)}
+
+/* Errores */
+.error-list{display:flex;flex-direction:column;gap:6px}
+.error-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface3);border-radius:5px}
+.error-bar-wrap{width:60px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.error-bar{height:100%;border-radius:2px}
+
+/* Timeline */
+.tl-bar{display:flex;height:18px;border-radius:4px;overflow:hidden;gap:1px;margin-bottom:8px}
+.tl-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--font-head);color:rgba(255,255,255,0.6)}
+.tl-labels{display:flex;gap:10px;flex-wrap:wrap}
+.tl-label{font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px}
+.tl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ══════════════════════════════════
+   PERFIL DE USUARIO
+══════════════════════════════════ */
+.profile-back{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);cursor:pointer;margin-bottom:20px;font-family:var(--font-head);letter-spacing:0.05em;transition:color 0.15s;background:none;border:none;padding:0}
+.profile-back:hover{color:var(--text2)}
+.profile-header{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px}
+.profile-avatar{width:56px;height:56px;border-radius:50%;background:var(--orange-pale);border:2px solid var(--orange-dim);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--orange);flex-shrink:0}
+.profile-name{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text);line-height:1.2}
+.profile-rut{font-size:12px;color:var(--text3);font-family:var(--font-head);margin-top:4px}
+.profile-meta{font-size:12px;color:var(--text2);margin-top:6px}
+.profile-sep{flex:1}
+.profile-cert{text-align:right}
+.cert-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(27,191,160,0.1);border:1px solid rgba(27,191,160,0.25);border-radius:8px;padding:10px 16px}
+.cert-icon{font-size:20px}
+.cert-label{font-family:var(--font-head);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--teal)}
+.cert-date{font-size:11px;color:var(--teal-dim);margin-top:2px}
+.cert-badge.no-cert{background:rgba(217,64,64,0.08);border-color:rgba(217,64,64,0.2)}
+.cert-badge.no-cert .cert-label{color:var(--red)}
+.cert-badge.no-cert .cert-date{color:var(--red)}
+
+.profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+
+.btn-pdf{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--border2);border-radius:6px;padding:8px 16px;font-family:var(--font-head);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);cursor:pointer;margin-top:10px;transition:all 0.15s}
+.btn-pdf:hover{border-color:var(--teal);color:var(--teal)}
+.btn-pdf.disabled{opacity:0.35;cursor:not-allowed}
+
+/* Historial de intentos */
+.attempt-list{display:flex;flex-direction:column;gap:8px}
+.attempt-card{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden}
+.attempt-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.attempt-pass::before{background:var(--teal)}
+.attempt-fail::before{background:var(--red)}
+.attempt-num{font-family:var(--font-head);font-size:10px;color:var(--text3);min-width:32px}
+.attempt-date{font-size:12px;color:var(--text2);min-width:90px}
+.attempt-dur{font-family:var(--font-head);font-size:11px;color:var(--text2);min-width:50px}
+.attempt-scenes{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.scene-chip{font-size:9px;font-family:var(--font-head);padding:2px 7px;border-radius:3px;border:1px solid var(--border2)}
+.chip-pass{background:rgba(27,191,160,0.1);color:var(--teal);border-color:rgba(27,191,160,0.2)}
+.chip-fail{background:rgba(217,64,64,0.08);color:var(--red);border-color:rgba(217,64,64,0.2)}
+.attempt-score{font-family:var(--font-head);font-size:16px;font-weight:700;min-width:44px;text-align:right}
+
+/* Comparativa */
+.compare-grid{display:flex;flex-direction:column;gap:8px}
+.compare-row{display:grid;grid-template-columns:100px 1fr 1fr 50px;align-items:center;gap:10px;font-size:11px}
+.compare-label{font-size:11px;color:var(--text2)}
+.compare-bars{display:flex;flex-direction:column;gap:3px}
+.cbar-wrap{height:6px;background:var(--border2);border-radius:3px;overflow:hidden;position:relative}
+.cbar-fill{height:100%;border-radius:3px;position:absolute;top:0;left:0}
+.compare-legend{display:flex;gap:14px;margin-bottom:10px}
+.cleg-item{font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px}
+.cleg-dot{width:10px;height:4px;border-radius:2px}
+
+/* Módulo info */
+.module-info{background:var(--orange-pale);border:1px solid rgba(224,90,27,0.2);border-radius:var(--radius);padding:10px 14px;font-size:11px;color:rgba(224,90,27,0.7);display:flex;align-items:center;gap:8px;margin-bottom:20px}
+
+/* ══════════════════════════════════
+   MISC
+══════════════════════════════════ */
+.section-title{font-family:var(--font-head);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:12px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;margin-right:5px;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.no-result{padding:32px;text-align:center;color:var(--text3);font-size:13px}
+.tag{display:inline-block;font-size:9px;font-family:var(--font-head);padding:2px 7px;border-radius:3px;background:var(--surface4);color:var(--text3);border:1px solid var(--border2);margin-right:4px}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     VISTA 1: LOGIN
+════════════════════════════════ -->
+<div id="view-login" class="view active">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-badge">VR-SAFE</div>
+      <div class="login-logo-text">PLATAFORMA DE CAPACITACIÓN</div>
+    </div>
+    <div class="login-card">
+      <div class="login-title">Acceso Administrador</div>
+      <div class="login-sub">Solo personal de RRHH y Capacitación autorizado</div>
+      <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+      <div class="form-group">
+        <label class="form-label">Usuario</label>
+        <input class="form-input" id="login-user" type="text" placeholder="usuario@empresa.cl" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input class="form-input" id="login-pass" type="password" placeholder="••••••••">
+        <div class="login-hint">Demo: admin / 1234</div>
+      </div>
+      <button class="btn-login" onclick="doLogin()">Ingresar al sistema</button>
+    </div>
+    <div class="login-footer">VR-SAFE Platform · Módulo Extintor PQS v2.1 · © 2026</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     VISTA 2: DASHBOARD GENERAL
+════════════════════════════════ -->
+<div id="view-dashboard" class="view">
+  <nav class="app-nav">
+    <div class="nav-logo">
+      <div class="nav-badge">VR-SAFE</div>
+      <div class="nav-title">Centro de Capacitación</div>
+    </div>
+    <div class="nav-sep"></div>
+    <span class="live-dot"></span>
+    <div class="nav-user">
+      <div class="nav-avatar">AC</div>
+      <span>Admin Capacitación</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Salir</button>
+  </nav>
+  <div class="page-content">
+
+    <!-- Buscador RUT -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="rut-input" type="text" placeholder="Buscar trabajador por RUT — ej: 12.345.678-9" oninput="formatRut(this)" onkeydown="if(event.key==='Enter')searchRut()">
+      <div class="search-hint" id="search-hint"></div>
+      <button class="btn-search" onclick="searchRut()">Buscar RUT</button>
+    </div>
+
+    <!-- Métricas globales -->
+    <div class="metrics-row">
+      <div class="metric-card mc-orange">
+        <div class="metric-label">Sesiones totales</div>
+        <div class="metric-value">1,284</div>
+        <div class="metric-delta delta-up">↑ +38 esta semana</div>
+      </div>
+      <div class="metric-card mc-teal">
+        <div class="metric-label">Tasa de aprobación</div>
+        <div class="metric-value">78<sup>%</sup></div>
+        <div class="metric-delta delta-up">↑ +4 pp vs mes anterior</div>
+      </div>
+      <div class="metric-card mc-amber">
+        <div class="metric-label">Tiempo promedio</div>
+        <div class="metric-value">2<sup>:41</sup></div>
+        <div class="metric-delta delta-down">↓ 19s sobre la meta</div>
+      </div>
+      <div class="metric-card mc-red">
+        <div class="metric-label">Errores críticos</div>
+        <div class="metric-value">247</div>
+        <div class="metric-delta delta-down">↑ +12 esta semana</div>
+      </div>
+    </div>
+
+    <!-- Escenas + PASS -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Rendimiento por escena</span>
+          <span class="panel-badge">Guion v2.1</span>
+        </div>
+        <div class="scene-list">
+          <div class="scene-row"><span class="scene-num">E1</span><span class="scene-name">Identificación del riesgo</span><div class="scene-bar-wrap"><div class="scene-bar-fill" style="width:92%;background:var(--teal)"></div></div><span class="scene-pct" style="color:var(--teal)">92%</span><span class="scene-time">0:18</span></div>
+          <div class="scene-row"><span class="scene-num">E2</span><span class="scene-name">Evaluación del riesgo</span><div class="scene-bar-wrap"><div class="scene-bar-fill" style="width:88%;background:var(--teal)"></div></div><span class="scene-pct" style="color:var(--teal)">88%</span><span class="scene-time">0:25</span></div>
+          <div class="scene-row"><span class="scene-num">E3</span><span class="scene-name">Selección del extintor</span><div class="scene-bar-wrap"><div class="scene-bar-fill" style="width:71%;background:var(--orange)"></div></div><span class="scene-pct" style="color:var(--orange)">71%</span><span class="scene-time">0:32</span></div>
+          <div class="scene-row"><span class="scene-num">E4</span><span class="scene-name">Técnica PASS</span><div class="scene-bar-wrap"><div class="scene-bar-fill" style="width:64%;background:var(--amber)"></div></div><span class="scene-pct" style="color:var(--amber)">64%</span><span class="scene-time">1:05</span></div>
+          <div class="scene-row"><span class="scene-num">E5</span><span class="scene-name">Control del incendio</span><div class="scene-bar-wrap"><div class="scene-bar-fill" style="width:55%;background:var(--amber)"></div></div><span class="scene-pct" style="color:var(--amber)">55%</span><span class="scene-time">0:38</span></div>
+          <div class="scene-row"><span class="scene-num">E6</span><span class="scene-name">Cierre y aprendizaje</span><div class="scene-bar-wrap"><div class="scene-bar-fill" style="width:82%;background:var(--teal)"></div></div><span class="scene-pct" style="color:var(--teal)">82%</span><span class="scene-time">0:20</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Precisión técnica PASS</span></div>
+        <div class="pass-grid">
+          <div class="pass-card"><div class="pass-letter">P</div><div class="pass-word">Pull · Seguro</div><div class="pass-bar"><div class="pass-bar-fill" style="width:91%;background:var(--teal)"></div></div><div class="pass-pct" style="color:var(--teal)">91%</div></div>
+          <div class="pass-card"><div class="pass-letter">A</div><div class="pass-word">Aim · Apuntar</div><div class="pass-bar"><div class="pass-bar-fill" style="width:63%;background:var(--amber)"></div></div><div class="pass-pct" style="color:var(--amber)">63%</div></div>
+          <div class="pass-card"><div class="pass-letter">S</div><div class="pass-word">Squeeze · Presionar</div><div class="pass-bar"><div class="pass-bar-fill" style="width:84%;background:var(--teal)"></div></div><div class="pass-pct" style="color:var(--teal)">84%</div></div>
+          <div class="pass-card"><div class="pass-letter">S</div><div class="pass-word">Sweep · Barrido</div><div class="pass-bar"><div class="pass-bar-fill" style="width:48%;background:var(--red)"></div></div><div class="pass-pct" style="color:var(--red)">48%</div></div>
+        </div>
+        <div style="margin-top:12px;padding:8px 10px;background:var(--red-pale);border:1px solid rgba(217,64,64,0.2);border-radius:6px">
+          <div style="font-size:10px;font-family:var(--font-head);color:var(--red);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px">Área crítica</div>
+          <div style="font-size:11px;color:var(--text2)">El barrido es el paso con menor tasa de éxito. Reforzar feedback háptico en E4.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla + Errores -->
+    <div class="grid-3">
+      <div class="panel" style="grid-column:span 2">
+        <div class="panel-header">
+          <span class="panel-title">Últimas sesiones</span>
+          <span class="panel-badge">Hacer clic en fila → ver perfil</span>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Trabajador</th><th>RUT</th><th>Área</th><th>Duración</th><th>Puntaje</th><th>Intentos</th><th>Estado</th></tr></thead>
+          <tbody id="sessions-table-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Errores frecuentes</span></div>
+          <div class="error-list">
+            <div class="error-row"><div style="flex:1;font-size:11px;color:var(--text2)">Apunta a llamas, no a base</div><div class="error-bar-wrap"><div class="error-bar" style="width:100%;background:var(--red)"></div></div><span style="font-family:var(--font-head);font-size:11px;color:var(--red)">38%</span></div>
+            <div class="error-row"><div style="flex:1;font-size:11px;color:var(--text2)">Barrido interrumpido</div><div class="error-bar-wrap"><div class="error-bar" style="width:76%;background:var(--red)"></div></div><span style="font-family:var(--font-head);font-size:11px;color:var(--red)">29%</span></div>
+            <div class="error-row"><div style="flex:1;font-size:11px;color:var(--text2)">Extintor incorrecto</div><div class="error-bar-wrap"><div class="error-bar" style="width:47%;background:var(--amber)"></div></div><span style="font-family:var(--font-head);font-size:11px;color:var(--amber)">18%</span></div>
+            <div class="error-row"><div style="flex:1;font-size:11px;color:var(--text2)">Sin verificar salida</div><div class="error-bar-wrap"><div class="error-bar" style="width:39%;background:var(--amber)"></div></div><span style="font-family:var(--font-head);font-size:11px;color:var(--amber)">15%</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Módulos disponibles</span></div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text2)">Extintor PQS (3 min)</span><span style="color:var(--teal);font-family:var(--font-head);font-size:10px">ACTIVO</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text3)">Extintor CO₂</span><span style="color:var(--text3);font-family:var(--font-head);font-size:10px">PRONTO</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text3)">Evacuación de piso</span><span style="color:var(--text3);font-family:var(--font-head);font-size:10px">PRONTO</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text3)">Trabajo en altura</span><span style="color:var(--text3);font-family:var(--font-head);font-size:10px">PRONTO</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     VISTA 3: PERFIL POR RUT
+════════════════════════════════ -->
+<div id="view-profile" class="view">
+  <nav class="app-nav">
+    <div class="nav-logo">
+      <div class="nav-badge">VR-SAFE</div>
+      <div class="nav-title">Perfil de Trabajador</div>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-user">
+      <div class="nav-avatar">AC</div>
+      <span>Admin Capacitación</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Salir</button>
+  </nav>
+  <div class="page-content">
+    <button class="profile-back" onclick="showView('dashboard')">← Volver al dashboard</button>
+    <div id="profile-content"></div>
+  </div>
+</div>
+
+<script>
+/* ─── DATOS SIMULADOS ─── */
+const USERS = {
+  "12345678-9": {
+    nombre:"Carlos Vargas", rut:"12.345.678-9", area:"Bodega", cargo:"Operador de Bodega",
+    certificado:true, certFecha:"14 Mar 2026",
+    intentos:[
+      {n:1,fecha:"02 Feb 2026",dur:"3:12",puntaje:61,estado:"fail",escenas:[true,true,true,false,false,true]},
+      {n:2,fecha:"15 Feb 2026",dur:"2:55",puntaje:74,estado:"fail",escenas:[true,true,true,true,false,true]},
+      {n:3,fecha:"14 Mar 2026",dur:"2:38",puntaje:91,estado:"pass",escenas:[true,true,true,true,true,true]},
+    ],
+    scores:[92,88,90,85,95,91]
+  },
+  "15678432-1": {
+    nombre:"Rosa Mendoza", rut:"15.678.432-1", area:"Mantención", cargo:"Técnica de Mantención",
+    certificado:true, certFecha:"20 Mar 2026",
+    intentos:[
+      {n:1,fecha:"10 Mar 2026",dur:"3:12",puntaje:72,estado:"pass",escenas:[true,true,true,true,false,true]},
+      {n:2,fecha:"20 Mar 2026",dur:"2:48",puntaje:85,estado:"pass",escenas:[true,true,true,true,true,true]},
+    ],
+    scores:[88,90,85,70,68,88]
+  },
+  "9876543-2": {
+    nombre:"Luis Torres", rut:"9.876.543-2", area:"Producción", cargo:"Operador de Línea",
+    certificado:false, certFecha:null,
+    intentos:[
+      {n:1,fecha:"05 Mar 2026",dur:"3:45",puntaje:38,estado:"fail",escenas:[true,false,true,false,false,false]},
+      {n:2,fecha:"12 Mar 2026",dur:"3:20",puntaje:51,estado:"fail",escenas:[true,true,false,false,false,true]},
+      {n:3,fecha:"22 Mar 2026",dur:"2:55",puntaje:48,estado:"fail",escenas:[true,true,true,false,false,false]},
+    ],
+    scores:[85,60,50,35,30,45]
+  },
+  "11234567-8": {
+    nombre:"María Fuentes", rut:"11.234.567-8", area:"SSGG", cargo:"Asistente Administrativa",
+    certificado:false, certFecha:null,
+    intentos:[
+      {n:1,fecha:"01 Abr 2026",dur:"—",puntaje:null,estado:"prog",escenas:[true,true,false,false,false,false]},
+    ],
+    scores:[90,85,0,0,0,0]
+  },
+  "13456789-0": {
+    nombre:"Pablo Ríos", rut:"13.456.789-0", area:"Calidad", cargo:"Inspector de Calidad",
+    certificado:true, certFecha:"28 Feb 2026",
+    intentos:[
+      {n:1,fecha:"28 Feb 2026",dur:"2:21",puntaje:88,estado:"pass",escenas:[true,true,true,true,true,true]},
+    ],
+    scores:[95,92,88,85,80,92]
+  }
+};
+
+const PROM_GLOBAL = [92,88,71,64,55,82];
+const ESCENAS = ["E1 · Identificación","E2 · Evaluación","E3 · Selección extintor","E4 · Técnica PASS","E5 · Control incendio","E6 · Cierre"];
+
+/* ─── NAVEGACIÓN ─── */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ─── LOGIN ─── */
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  if(u==='admin' && p==='1234'){
+    err.classList.remove('visible');
+    renderSessionsTable();
+    showView('dashboard');
+  } else {
+    err.classList.add('visible');
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+function doLogout(){
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  showView('login');
+}
+
+/* ─── TABLA SESIONES ─── */
+function renderSessionsTable(){
+  const tb=document.getElementById('sessions-table-body');
+  const rows=Object.values(USERS).flatMap(u=>
+    u.intentos.map(i=>({...i, nombre:u.nombre, rut:u.rut, area:u.area, rutKey:Object.keys(USERS).find(k=>USERS[k]===u)}))
+  ).sort((a,b)=>b.n-a.n).slice(0,8);
+  tb.innerHTML=rows.map(r=>`
+    <tr onclick="showProfile('${r.rutKey}')">
+      <td>${r.nombre}</td>
+      <td><span class="rut-link">${r.rut}</span></td>
+      <td style="color:var(--text3)">${r.area}</td>
+      <td>${r.dur}</td>
+      <td><span class="score ${r.puntaje>=80?'score-hi':r.puntaje>=60?'score-mid':'score-lo'}">${r.puntaje!=null?r.puntaje+'%':'—'}</span></td>
+      <td style="text-align:center">${r.n}</td>
+      <td><span class="badge ${r.estado==='pass'?'badge-pass':r.estado==='fail'?'badge-fail':'badge-prog'}">${r.estado==='pass'?'Aprobado':r.estado==='fail'?'Reprobado':'En curso'}</span></td>
+    </tr>`).join('');
+}
+
+/* ─── BUSCADOR RUT ─── */
+function formatRut(el){
+  let v=el.value.replace(/[^0-9kK]/g,'').toUpperCase();
+  if(v.length>1){v=v.slice(0,-1).replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+v.slice(-1)}
+  el.value=v;
+  document.getElementById('search-hint').textContent='';
+}
+function searchRut(){
+  const raw=document.getElementById('rut-input').value.replace(/\./g,'').replace('-','').toLowerCase();
+  const key=Object.keys(USERS).find(k=>k.replace(/\./g,'').replace('-','').toLowerCase()===raw);
+  if(key){showProfile(key);}
+  else{document.getElementById('search-hint').textContent='RUT no encontrado';}
+}
+document.getElementById('rut-input').addEventListener('keydown',e=>{if(e.key==='Enter')searchRut()});
+
+/* ─── PERFIL ─── */
+function showProfile(rutKey){
+  const u=USERS[rutKey];
+  if(!u)return;
+  const mejor=Math.max(...u.intentos.filter(i=>i.puntaje!=null).map(i=>i.puntaje));
+  const ultimo=u.intentos[u.intentos.length-1];
+  const totalIntentos=u.intentos.length;
+
+  document.getElementById('profile-content').innerHTML=`
+    <div class="profile-header">
+      <div class="profile-avatar">${u.nombre.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+      <div>
+        <div class="profile-name">${u.nombre}</div>
+        <div class="profile-rut">${u.rut}</div>
+        <div class="profile-meta">${u.cargo} · <span style="color:var(--text3)">${u.area}</span></div>
+      </div>
+      <div class="profile-sep"></div>
+      <div class="profile-cert">
+        <div class="cert-badge ${u.certificado?'':'no-cert'}">
+          <span class="cert-icon">${u.certificado?'🎓':'⏳'}</span>
+          <div>
+            <div class="cert-label">${u.certificado?'Certificado VR-SAFE':'Sin certificado'}</div>
+            <div class="cert-date">${u.certificado?'Emitido: '+u.certFecha:'Módulo PQS no aprobado'}</div>
+          </div>
+        </div>
+        <div>
+          <button class="btn-pdf ${u.certificado?'':'disabled'}" onclick="${u.certificado?"alert('Descargando certificado PDF para "+u.nombre+"...')":"alert('El trabajador aún no ha aprobado el módulo.')"}">
+            ↓ Descargar certificado PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="metric-card mc-orange">
+        <div class="metric-label">Intentos totales</div>
+        <div class="metric-value">${totalIntentos}</div>
+        <div class="metric-delta" style="color:var(--text3)">Módulo PQS</div>
+      </div>
+      <div class="metric-card mc-teal">
+        <div class="metric-label">Mejor puntaje</div>
+        <div class="metric-value">${mejor!=null?mejor:'—'}<sup>${mejor!=null?'%':''}</sup></div>
+        <div class="metric-delta ${mejor>=80?'delta-up':'delta-down'}">${mejor>=80?'✓ Aprobado':'✗ No aprobado'}</div>
+      </div>
+      <div class="metric-card mc-amber">
+        <div class="metric-label">Último intento</div>
+        <div class="metric-value" style="font-size:16px">${ultimo.fecha}</div>
+        <div class="metric-delta" style="color:var(--text3)">Duración: ${ultimo.dur}</div>
+      </div>
+      <div class="metric-card ${u.certificado?'mc-teal':'mc-red'}">
+        <div class="metric-label">Estado</div>
+        <div class="metric-value" style="font-size:14px;margin-top:4px">${u.certificado?'Certificado':'Pendiente'}</div>
+        <div class="metric-delta ${u.certificado?'delta-up':'delta-down'}">${u.certificado?'Módulo completado':'Requiere aprobación'}</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Historial de intentos</span></div>
+        <div class="attempt-list">
+          ${u.intentos.map(i=>`
+            <div class="attempt-card attempt-${i.estado==='pass'?'pass':i.estado==='fail'?'fail':'fail'}">
+              <span class="attempt-num">Int. ${i.n}</span>
+              <span class="attempt-date">${i.fecha}</span>
+              <span class="attempt-dur">${i.dur}</span>
+              <div class="attempt-scenes">
+                ${ESCENAS.map((e,idx)=>`<span class="scene-chip ${i.escenas[idx]?'chip-pass':'chip-fail'}">${'E'+(idx+1)}</span>`).join('')}
+              </div>
+              <span class="attempt-score ${i.puntaje>=80?'score-hi':i.puntaje>=60?'score-mid':'score-lo'}">${i.puntaje!=null?i.puntaje+'%':'—'}</span>
+              <span class="badge ${i.estado==='pass'?'badge-pass':i.estado==='fail'?'badge-fail':'badge-prog'}">${i.estado==='pass'?'Aprobado':i.estado==='fail'?'Reprobado':'En curso'}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Rendimiento vs. promedio del equipo</span></div>
+        <div class="compare-legend">
+          <div class="cleg-item"><div class="cleg-dot" style="background:var(--orange)"></div>${u.nombre.split(' ')[0]}</div>
+          <div class="cleg-item"><div class="cleg-dot" style="background:var(--border3)"></div>Promedio equipo</div>
+        </div>
+        <div class="compare-grid">
+          ${ESCENAS.map((e,i)=>`
+            <div class="compare-row">
+              <div class="compare-label">${'E'+(i+1)+' · '+e.split(' · ')[1]}</div>
+              <div class="compare-bars" style="grid-column:span 2">
+                <div class="cbar-wrap"><div class="cbar-fill" style="width:${u.scores[i]}%;background:var(--orange)"></div></div>
+                <div class="cbar-wrap" style="margin-top:2px"><div class="cbar-fill" style="width:${PROM_GLOBAL[i]}%;background:var(--border3)"></div></div>
+              </div>
+              <div>
+                <div style="font-family:var(--font-head);font-size:10px;color:var(--orange)">${u.scores[i]>0?u.scores[i]+'%':'—'}</div>
+                <div style="font-family:var(--font-head);font-size:10px;color:var(--text3)">${PROM_GLOBAL[i]}%</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  showView('profile');
+}
+</script>
+</body>
+</html>
